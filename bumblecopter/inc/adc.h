@@ -1,0 +1,37 @@
+/*
+ *  Project:      Bumblecopter
+ *  File:         adc.h
+ *  Author:       Gerd Bartelt
+ *
+ *  Description:  header file for adc.c
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+#ifndef ADC_H_
+#define ADC_H_
+
+#include "stm32f4xx.h"
+#include "stm32f4xx_dma.h"
+#include "stm32f4xx_adc.h"
+void adc_init();
+void adc_start_conv(void);
+uint16_t adc_getResult(int chan);
+
+#define ADC_CHAN_SUN 8
+#define ADC_CHAN_POL 9
+#define ADC_CHAN_BATT 10
+
+
+#endif /* ADC_H_ */
