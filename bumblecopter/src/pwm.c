@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         pwm.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  PWM Generation for the actuators
  *

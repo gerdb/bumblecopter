@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         controller.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for controller.c
  *

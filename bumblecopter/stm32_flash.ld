@@ -129,9 +129,9 @@ SECTIONS
 
   .memory_b1_text :
   {
-    *(.mb1text)        /* .mb1text sections (code) */
-    *(.mb1text*)       /* .mb1text* sections (code)  */
-    *(.mb1rodata)      /* read-only data (constants) */
+    *(.mb1text)        
+    *(.mb1text*)       
+    *(.mb1rodata)     
     *(.mb1rodata*)
   } >MEMORY_B1
 

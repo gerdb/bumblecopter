@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         rotation.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for rotation.c
  *

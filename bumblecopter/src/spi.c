@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         spi.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  SPI bus to the gyro and pressure sensor
  *

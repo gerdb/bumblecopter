@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         typedef.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  types and enums
  *

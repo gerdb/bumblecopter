@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         rc.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for rc.c
  *

@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         controller.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  Calculates the angle based on the polarized light
  *                or the gyro sensor

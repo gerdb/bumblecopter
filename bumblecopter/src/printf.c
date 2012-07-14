@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         printf.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  This a an modified version of printf for the bumblecopter
  *                project. Original file is written by Georges Menie.

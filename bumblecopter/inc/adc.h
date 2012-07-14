@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         adc.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for adc.c
  *
@@ -25,6 +25,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_dma.h"
 #include "stm32f4xx_adc.h"
+
 void adc_init();
 void adc_start_conv(void);
 uint16_t adc_getResult(int chan);

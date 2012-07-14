@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         light.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  Controls the LEDs and used them to display
  *                the rotation angle or error states

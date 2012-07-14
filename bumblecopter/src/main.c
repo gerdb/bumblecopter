@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         main.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  main programm
  *
@@ -32,6 +32,8 @@
 #include "rotation.h"
 #include "controller.h"
 #include "power.h"
+#include "dac.h"
+#include "project.h"
 
 extern int32_t KP;
 extern int32_t KI;
@@ -53,9 +55,12 @@ int main(void) {
 	int16_t pwm = 0;
 	int16_t rc = 0;
 
-
+	// initialize all modules
 	light_init();
 	adc_init();
+#ifdef USE_DAC
+	dac_init();
+#endif
 	pwm_init();
 	rc_init();
 	spi_init();
@@ -65,16 +70,12 @@ int main(void) {
 	rotation_init();
 
 	// set sys tick to 100us
-	if (SysTick_Config(SystemCoreClock / 10000))
-	{
-		while (1); //Capture error
-	}
+	SysTick_Config(SystemCoreClock / 10000);
 
 	while (1) {
 
 		// wait for task tick
-		while (tick == 0) {
-		}
+		while (tick == 0);
 		tick = 0;
 
 		time++;

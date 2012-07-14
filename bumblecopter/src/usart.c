@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         usart.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  usart bus for debugging
  *

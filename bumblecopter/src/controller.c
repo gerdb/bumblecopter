@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         controller.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  PD controller for the high speed actuators
  *

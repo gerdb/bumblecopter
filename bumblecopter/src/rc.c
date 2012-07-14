@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         rc.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  Decodes the signal from the RC receiver
  *

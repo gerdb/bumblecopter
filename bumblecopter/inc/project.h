@@ -1,9 +1,9 @@
 /*
  *  Project:      Bumblecopter
- *  File:         pwm.h
+ *  File:         project.h
  *  Author:       Gerd Bartelt - www.sebulli.com
  *
- *  Description:  header file for pwm.c
+ *  Description:  Settings for the whole project
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,13 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef PWM_H_
-#define PWM_H_
+#ifndef PROJECT_H_
+#define PROJECT_H_
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_tim.h"
+#define USE_DAC
 
-void pwm_init(void);
-void pwm_set(uint16_t channel, int16_t value);
-
-#endif /* PWM_H_ */
+#endif /* PROJECT_H_ */

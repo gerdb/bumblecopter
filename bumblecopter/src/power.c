@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         power.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  Measures the battery voltage and sets under voltage errors
  *

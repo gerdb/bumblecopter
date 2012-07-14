@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         main.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for main.c
  *

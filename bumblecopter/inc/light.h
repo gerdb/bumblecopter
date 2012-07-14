@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         light.h
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com
  *
  *  Description:  header file for light.c
  *

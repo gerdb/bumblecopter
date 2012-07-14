@@ -1,7 +1,7 @@
 /*
  *  Project:      Bumblecopter
  *  File:         adc.c
- *  Author:       Gerd Bartelt
+ *  Author:       Gerd Bartelt - www.sebulli.com - www.sebulli.com
  *
  *  Description:  Configures and reads the analog digital converter
  *
@@ -20,6 +20,7 @@
  *
  */
 #include "adc.h"
+#include "project.h"
 
 #define ADC1_DR_ADDRESS    ((uint32_t)0x4001204C)
 __IO uint16_t ADCConvertedValue[11] = {0,0,0,0,0,0,0,0,0,0,0};
