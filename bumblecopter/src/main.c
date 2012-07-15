@@ -33,26 +33,22 @@
 #include "controller.h"
 #include "power.h"
 #include "dac.h"
+#include "wings.h"
 #include "project.h"
 
 extern int32_t KP;
-extern int32_t KI;
 extern int32_t KD;
 
-GPIO_InitTypeDef  GPIO_InitStructure;
-__IO int tick = 0;
+int tick = 0;
 e_sysstate sysstate = IDLE;
-__IO int step= 600;
-void Delay(__IO uint32_t nCount) {
-  while(nCount--) {
-  }
-}
+int step= 600;
+
 
 int main(void) {
 	int taskcnt = 0;
-	int t2cnt = 0;
+//	int t2cnt = 0;
 	int time = 0;
-	int16_t pwm = 0;
+//	int16_t pwm = 0;
 	int16_t rc = 0;
 
 	// initialize all modules
@@ -66,6 +62,7 @@ int main(void) {
 	controller_init();
 	power_init();
 	rotation_init();
+	wings_init();
 
 	sysstate = GYRO;
 
@@ -83,6 +80,7 @@ int main(void) {
 		spi_machine();
 		rotation_task();
 		power_task();
+		wings_task(sysstate);
 		light_task(sysstate);
 
 
@@ -94,17 +92,16 @@ int main(void) {
 			//my_printf("%d,%d,%d,%d,%d,%d,%d\r\n",adc_getResult(3),adc_getResult(4),reg,KP,KI,KD,step);
 			//my_printf("%d\r\n",rotation_getAngle());
 			//my_printf("%d\r\n",power_getUbatFilt());
-			t2cnt ++;
-
-			if (t2cnt == 10) {
-				t2cnt = 0;
-				if (pwm == step) {
-					pwm = -step;
-				}
-				else {
-					pwm = step;
-				}
-			}
+//			t2cnt ++;
+//			if (t2cnt == 10) {
+//				t2cnt = 0;
+//				if (pwm == step) {
+//					pwm = -step;
+//				}
+//				else {
+//					pwm = step;
+//				}
+//			}
 //			controller_setSetpoint(0,pwm);
 //			controller_setSetpoint(1,pwm);
 //			controller_setSetpoint(2,pwm);
@@ -120,6 +117,35 @@ int main(void) {
 
 		}
 
+		// IDLE mode, if the left joystick is pulled down
+		if ( rc_get_channel(RC_CHANNEL_SPEED) < -30) {
+
+			// Use the simulated mode if the left joystick is pulled to the
+			// left down position
+			if ( (rc_get_channel(RC_CHANNEL_TEST) > 10 ) &&
+					( rc_get_channel(RC_CHANNEL_SWITCH) > 0) ){
+				sysstate = SUNSIMULATION;
+				rotation_useSimulation(rc_get_channel(RC_CHANNEL_TEST)-10);
+			} else {
+				sysstate = IDLE;
+			}
+		}
+		else {
+
+			// Switch between GYRO and SUN mode with the channel 5 switch
+			if ( rc_get_channel(RC_CHANNEL_SWITCH) > 0) {
+				sysstate = SUN;
+			}
+			else {
+				sysstate = GYRO;
+			}
+		}
+
+		// Do not use the simulated value
+		if ( sysstate != SUNSIMULATION) {
+			rotation_useSimulation(0);
+		}
+
 		taskcnt ++;
 		if (taskcnt >= 4) {
 
@@ -129,10 +155,10 @@ int main(void) {
 		adc_start_conv();
 
 
-		controller_setSetpoint(0,rc_get_channel(RC_CHANNEL_SPEED)*16);
-		controller_setSetpoint(1,rc_get_channel(RC_CHANNEL_SPEED)*16);
-		controller_setSetpoint(2,rc_get_channel(RC_CHANNEL_SPEED)*16);
-		controller_setSetpoint(3,rc_get_channel(RC_CHANNEL_SPEED)*16);
+//		controller_setSetpoint(0,rc_get_channel(RC_CHANNEL_SPEED)*16);
+//		controller_setSetpoint(1,rc_get_channel(RC_CHANNEL_SPEED)*16);
+//		controller_setSetpoint(2,rc_get_channel(RC_CHANNEL_SPEED)*16);
+//		controller_setSetpoint(3,rc_get_channel(RC_CHANNEL_SPEED)*16);
 
 	}
 }

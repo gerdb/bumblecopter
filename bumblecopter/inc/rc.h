@@ -35,6 +35,10 @@ void rc_set(int16_t value);
 int16_t rc_get_channel(int channel);
 
 // Constant values
-#define RC_CHANNEL_SPEED 0
+#define RC_CHANNEL_Y 0
+#define RC_CHANNEL_X 1
+#define RC_CHANNEL_SPEED 2
+#define RC_CHANNEL_TEST 3
+#define RC_CHANNEL_SWITCH 4
 
 #endif /* RC_H_ */

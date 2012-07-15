@@ -24,7 +24,7 @@
 #include "spi.h"
 #include "adc.h"
 #include "dac.h"
-#include <math.h>
+
 
 // gyro integrator
 int32_t integrator=0;
@@ -57,9 +57,8 @@ uint16_t median = 0;
 uint16_t phasecnt = 0;
 uint16_t relphasecnt = 0;
 uint32_t phase = 0;
-// Sine and cosine tables
-int SINTAB[256];
-int COSTAB[256];
+uint32_t simuphase = 0;
+int use_sim = 0;
 
 // filter value, 8192 = 819ms
 #define POLFILT 8192
@@ -71,13 +70,12 @@ int COSTAB[256];
  * Initialize the rotation module
  */
 void rotation_init(void) {
+
 	int i;
 
 	// reset the FIR filter and fill the cosine and sine table
 	for (i=0;i<256;i++) {
 		fir_buf[i] = 0;
-		COSTAB[i] = (int)(256.0*cos(M_TWOPI*(double)i/256.0));
-		SINTAB[i] = (int)(256.0*sin(M_TWOPI*(double)i/256.0));
 	}
 
 	fir_sum = 0;
@@ -162,6 +160,9 @@ void rotation_task(void) {
 	// The phase is limtted to values from 0..255 = 0..359deg
 	phase = (relphasecnt * 256 / rotperiode) & 0x00FF;
 
+	// simulate a phase
+	simuphase += use_sim;
+
 	firSign_old = firSign;
 
 	// Debug
@@ -178,7 +179,10 @@ void rotation_task(void) {
  * 			The phase from 0..255
  */
 uint16_t rotation_getPhase(void) {
-	return phase;
+	if (use_sim)
+		return (simuphase / 128) & 0x00FF;
+	else
+		return phase;
 }
 
 /**
@@ -189,4 +193,14 @@ uint16_t rotation_getPhase(void) {
  */
 int rotation_getAngle(void) {
 	return integrator;
+}
+
+/**
+ * Setter for the simulation flag
+ *
+ * @param
+ * 			sim >0, if simulated value should be used
+ */
+void rotation_useSimulation(int sim) {
+	use_sim = sim;
 }

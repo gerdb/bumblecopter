@@ -3,7 +3,7 @@
  *  File:         rotation.h
  *  Author:       Gerd Bartelt - www.sebulli.com
  *
- *  Description:  header file for rotation.c
+ *  Description:  header file for wings.c
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,15 +19,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef ROTATION_H_
-#define ROTATION_H_
+#ifndef WINGS_H_
+#define WINGS_H_
 
 #include "stm32f4xx.h"
-
+#include "typedef.h"
 // Function Prototypes
-void rotation_init(void);
-void rotation_task(void);
-int rotation_getAngle(void);
-uint16_t rotation_getPhase(void);
-void rotation_useSimulation(int sim);
-#endif /* ROTATION_H_ */
+void wings_init(void);
+void wings_task(e_sysstate sysstate);
+
+#endif /* WINGS_H_ */

@@ -26,7 +26,9 @@ typedef enum {
 	OFF,
 	IDLE,
 	GYRO,
-	SUN} e_sysstate;
+	SUN,
+	SUNSIMULATION,
+} e_sysstate;
 
 typedef enum {
 	OK,

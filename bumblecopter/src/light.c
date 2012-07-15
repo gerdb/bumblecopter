@@ -183,6 +183,7 @@ void light_task(e_sysstate sysstate) {
 	// In SUN State, the LEDs are green, of they are in front of
 	// the bumblecopter. And red on the rear side.
 	case SUN:
+	case SUNSIMULATION:
 		rot_phase = rotation_getPhase();
 		if (rot_phase < 128) {
 			LED_ON(LED_G_1 | LED_R_2);
