@@ -23,6 +23,8 @@
 #define POWER_H_
 
 #include "stm32f4xx.h"
+
+// Function Prototypes
 void power_init(void);
 void power_task(void);
 uint32_t power_getUbat();

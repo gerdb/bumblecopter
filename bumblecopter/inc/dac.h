@@ -25,7 +25,8 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_dac.h"
 
-
+// Function Prototypes
 void dac_init(void);
+void dac_setValue(uint16_t value);
 
 #endif /* DAC_H_ */

@@ -23,42 +23,79 @@
 #include "rotation.h"
 #include "spi.h"
 #include "adc.h"
+#include "dac.h"
+#include <math.h>
 
-__IO int32_t integrator=0;
-__IO int32_t gyro_offset=-8;
-__IO int pol_lp_filt = 0;
-__IO int pol_hp_filt = 0;
-__IO int32_t pol_lp_filtL = 0;
-__IO int pol_act = 0;
+// gyro integrator
+int32_t integrator=0;
+// Offset of the gyro sensor
+int32_t gyro_offset=-8;
+// Low pass filter of the sun signal
+int pol_lp_filt = 0;
+int32_t pol_lp_filtL = 0;
+// High pass filter of the sun signal
+int pol_hp_filt = 0;
+// buffer of the FIR filter
 int fir_buf[256];
+// FIR index counter
 int fir_cnt = 0;
+// Sum of the FIR filter
 int32_t fir_sum = 0;
+// Sign of the sun light detection
 int firSign = 0;
 int firSign_old = 0;
+// Counter to suppredd the zero detection
 int fir_supressSignCnt = 0;
+// The timestamp of the edge detection
 uint16_t posEdge = 0;
 uint16_t negEdge = 0;
-uint16_t periode = 0;
+// Periode time
+uint16_t rotperiode = 0;
+// Timestamp of the median point (between pos and neg edge)
 uint16_t median = 0;
+// Synthesized phase
 uint16_t phasecnt = 0;
 uint16_t relphasecnt = 0;
 uint32_t phase = 0;
+// Sine and cosine tables
+int SINTAB[256];
+int COSTAB[256];
 
+// filter value, 8192 = 819ms
 #define POLFILT 8192
-#define SUPPRESSSIGN 8192
+// suppress a new zero detection for 10ms = 100
+#define SUPPRESSSIGN 100
 #define MAXSIGNCNT 30000
 
+/**
+ * Initialize the rotation module
+ */
 void rotation_init(void) {
 	int i;
+
+	// reset the FIR filter and fill the cosine and sine table
 	for (i=0;i<256;i++) {
 		fir_buf[i] = 0;
+		COSTAB[i] = (int)(256.0*cos(M_TWOPI*(double)i/256.0));
+		SINTAB[i] = (int)(256.0*sin(M_TWOPI*(double)i/256.0));
 	}
 
 	fir_sum = 0;
 	fir_cnt = 0;
 }
 
+
+/**
+ * Integrates the gyro, detects the sun light signals
+ * and generates a new signal, that is in phase with
+ * the sun signal
+ */
 void rotation_task(void) {
+
+	//The actual sun signal
+	int pol_act;
+
+	// Integrate the gyro signal
 	integrator+= spi_getGyro() + gyro_offset;
 
 	// get value of polarization sensor
@@ -78,23 +115,35 @@ void rotation_task(void) {
 	fir_cnt &= 0x00ff;
 	fir_sum-= fir_buf[fir_cnt];
 
+	// Create ta new phase based on this counter
 	phasecnt++;
 
+	// Detect a zero crossing
+	firSign = (fir_sum > 0);
+
+	// Suppress a detection of a new zero crossing for 10ms
 	if (fir_supressSignCnt < SUPPRESSSIGN) {
 		fir_supressSignCnt++;
 	}
 	else {
-		firSign = (fir_sum > 0);
 
 		// positive edge detected
 		if ((firSign == !0) && (firSign_old == 0) ) {
+
+			// Store counter at the positive edge
 			posEdge = phasecnt;
 			fir_supressSignCnt = 0;
 		}
 		// negative edge detected
-		if ((firSign == !0) && (firSign_old == 0) ) {
-			periode =  phasecnt - negEdge;
+		if ((firSign_old == !0) && (firSign == 0) ) {
+
+			// Store counter at the negative edge
+			// and calculate the periode time
+			rotperiode =  phasecnt - negEdge;
 			negEdge = phasecnt;
+
+			// Calculate the point in the middle between
+			// the positive and negative edge
 			if (negEdge >= posEdge) {
 				median = ((uint32_t)negEdge + (uint32_t)posEdge) / 2;
 			}
@@ -103,21 +152,41 @@ void rotation_task(void) {
 			}
 			fir_supressSignCnt = 0;
 		}
-		firSign_old = fir_sum;
 
-		relphasecnt = phasecnt - median;
-
-		phase = relphasecnt * 256 / periode;
 	}
 
+	// The pase is relative to the median point and
+	// corrected by half of the FIR delay
+	relphasecnt = phasecnt - median + 128;
+
+	// The phase is limtted to values from 0..255 = 0..359deg
+	phase = (relphasecnt * 256 / rotperiode) & 0x00FF;
+
+	firSign_old = firSign;
+
+	// Debug
+	// Scale 0..256 to 0..2048 (11Bit)
+	// dac_setValue((256+COSTAB[phase])*4);
 
 
 }
 
-int rotation_getPolFilt(void) {
-	return fir_sum;
+/**
+ * Getter for the rotation phase based on the sun sensor
+ *
+ * @return
+ * 			The phase from 0..255
+ */
+uint16_t rotation_getPhase(void) {
+	return phase;
 }
 
+/**
+ * Getter for the rotation phase based on the gyro sensor
+ *
+ * @return
+ * 			The integrator value
+ */
 int rotation_getAngle(void) {
 	return integrator;
 }

@@ -22,8 +22,8 @@
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_
 #include "stm32f4xx.h"
-extern int32_t reg;
 
+// Function Prototypes
 void controller_init(void);
 void controller_task(int channel);
 void controller_setSetpoint(int channel, int setp);

@@ -26,11 +26,15 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 
-#define RC_CHANNEL_SPEED 0
 
+
+// Function Prototypes
 void rc_captured(uint16_t duty, uint16_t periode);
 void rc_init(void);
 void rc_set(int16_t value);
 int16_t rc_get_channel(int channel);
+
+// Constant values
+#define RC_CHANNEL_SPEED 0
 
 #endif /* RC_H_ */

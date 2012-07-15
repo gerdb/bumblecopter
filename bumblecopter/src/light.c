@@ -23,16 +23,23 @@
 #include "light.h"
 #include "rotation.h"
 
+// variables of this module
 GPIO_InitTypeDef  GPIO_InitStructure;
-int phase;
-int on;
 e_sysstate sysstate_old = OFF;
+
+// Counts the error flashs
 int error_cnt=0;
+// Timer for the error flashs
 int error_tim=0;
+// The error state
 e_errstate error = OK;
 e_errstate new_error = OK;
+// Timer for the system-change-flash
 int light_m_cnt = 0;
 
+/**
+ * Initialize the light module
+ */
 void light_init(void){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOB, ENABLE);
 
@@ -54,48 +61,20 @@ void light_init(void){
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
-	phase = 0;
-	on	= 0;
 	LED_OFF(LED_G_1 | LED_R_1 |LED_G_2 |LED_R_2) ;
 }
 
-void light_update(){
-	if (on) {
-		switch (phase) {
-		case 0:
-			LED_ON(LED_G_1 | LED_G_2); // switch on  LEDs
-			LED_OFF(LED_R_1 | LED_R_2); // switch off LEDs
-			break;
-		case 1:
-			LED_ON(LED_G_1 | LED_R_2); // switch on  LEDs
-			LED_OFF(LED_R_1 | LED_G_2); // switch off LEDs
-			break;
-		case 2:
-			LED_ON(LED_R_1 | LED_R_2); // switch on  LEDs
-			LED_OFF(LED_G_1 | LED_G_2); // switch off LEDs
-			break;
-		case 3:
-			LED_ON(LED_R_1 | LED_G_2); // switch on  LEDs
-			LED_OFF(LED_G_1 | LED_R_2); // switch off LEDs
-			break;
-		}
-	}
-	else {
-		LED_OFF(LED_G_1 | LED_R_1 |LED_G_2 |LED_R_2) ;
-	}
-}
-
-void light_set_phase(int p_phase) {
-	phase = p_phase;
-	light_update();
-}
-
-void light_set_on(int p_on) {
-	on = p_on;
-	light_update();
-}
-
+/**
+ * Set an error
+ * The light will flash with the number of the error state
+ *
+ * @param
+ *			e Errorstate
+ */
 void light_set_error(e_errstate e) {
+
+	// The the error to the error with the
+	// highest priority
 	if (e != OFF) {
 		if ((new_error == OFF) || (e < new_error)) {
 			new_error = e;
@@ -106,6 +85,12 @@ void light_set_error(e_errstate e) {
 	}
 }
 
+/**
+ * Setter for the yellow power LED
+ *
+ * @param
+ * 			p_on state of the power led (ON or OFF)
+ */
 void light_power_led(int p_on) {
 	if (p_on == ON) {
 		// swtich on LED
@@ -117,14 +102,27 @@ void light_power_led(int p_on) {
 	}
 }
 
-
+/**
+ * Set the LEDs, depending on the system state
+ *
+ * @param
+ * 			sysstate System state
+ */
 void light_task(e_sysstate sysstate) {
 
+	// phase of the rotation
+	uint16_t rot_phase;
+
+	// let the LEDs flash with the number of the error
 	if (error != OK) {
+
+		// Flash frequency is 350ms
 		error_tim++;
 		if (error_tim > 3500) { // 350ms
 			error_tim=0;
 			error_cnt++;
+
+			// wait for 5 cyles for the next flash sequence
 			if (error_cnt>error) {
 				error_cnt = -5;
 				// take the new error
@@ -133,15 +131,8 @@ void light_task(e_sysstate sysstate) {
 			}
 		}
 
-//		if (error_tim < 1000 && error_cnt> 0) {
-//			LED_ON(LED_R_1 | LED_R_2);
-//			LED_OFF(LED_G_1 | LED_G_2);
-//		}
-//		else {
-//			LED_OFF(LED_R_1 | LED_R_2 | LED_G_1 | LED_G_2); // switch off LEDs
-//		}
-//		return;
-
+		// Flash the LEDs
+		// beause normaly they are ON, let them flash "OFF"
 		if (error_tim > 1000 && error_cnt> 0) {
 			LED_OFF(LED_R_1 | LED_R_2 | LED_G_1 | LED_G_2); // switch off LEDs
 			return;
@@ -149,25 +140,35 @@ void light_task(e_sysstate sysstate) {
 
 	}
 
+	// Detect a change of the system state
 	if (sysstate!=sysstate_old) {
 		light_m_cnt = 2500; // 250ms
 		sysstate_old = sysstate;
 	}
 
+	// Flash the LEDs one time, if the system state changes
 	if (light_m_cnt>0) {
 		light_m_cnt--;
 		LED_OFF(LED_R_1 | LED_R_2 | LED_G_1 | LED_G_2); // switch off LEDs
 		return;
 	}
 
+	// Switch on/off the LEDs, depending on the system state
 	switch (sysstate) {
+
+	// All LEDs are off
 	case OFF:
 		LED_OFF(LED_R_1 | LED_R_2 | LED_G_1 | LED_G_2); // switch off LEDs
 		break;
+
+	// In IDLE state, the green LEDs are on
 	case IDLE:
 		LED_ON(LED_G_1 | LED_G_2);
 		LED_OFF(LED_R_1 | LED_R_2);
 		break;
+
+	// In GYRO state, the LEDs are flashing very fast, but in phase
+	// with the rotation angle, from the rotation sensor
 	case GYRO:
 		if (rotation_getAngle() & 0x00100000) {
 			LED_ON(LED_R_1 | LED_R_2);
@@ -177,10 +178,22 @@ void light_task(e_sysstate sysstate) {
 			LED_ON(LED_G_1 | LED_G_2);
 			LED_OFF(LED_R_1 | LED_R_2);
 		}
-	break;
+		break;
+
+	// In SUN State, the LEDs are green, of they are in front of
+	// the bumblecopter. And red on the rear side.
 	case SUN:
+		rot_phase = rotation_getPhase();
+		if (rot_phase < 128) {
+			LED_ON(LED_G_1 | LED_R_2);
+			LED_OFF(LED_R_1 | LED_G_2);
+		}
+		else {
+			LED_ON(LED_R_1 | LED_G_2);
+			LED_OFF(LED_G_1 | LED_R_2);
+		}
+
 		break;
 	}
-
 
 }

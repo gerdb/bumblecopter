@@ -25,6 +25,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_tim.h"
 
+// Function Prototypes
 void pwm_init(void);
 void pwm_set(uint16_t channel, int16_t value);
 

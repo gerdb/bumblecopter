@@ -26,14 +26,13 @@
 #include "pwm.h"
 
 
-int32_t meas;
-int ad_channel_map[4][2];
-int32_t rdiff;
-int32_t meas_old[4]={0,0,0,0};
-int32_t reg = 0;
+// How the analog channels are mapped
+int AD_CHANNEL_MAP[4][2];
+// Setpoints
 int32_t setpoint[4]={0,0,0,0};
+
+// The controller parameters
 int32_t KP = 120; //120
-int32_t KI = 0;
 int32_t KD = 300; //-300
 #define CONTR_LIMIT 1000
 
@@ -43,17 +42,17 @@ int32_t KD = 300; //-300
 void controller_init(void) {
 
 	// Create a table with the index of all analog channels
-	ad_channel_map[0][0]=3;
-	ad_channel_map[0][1]=4;
+	AD_CHANNEL_MAP[0][0]=3;
+	AD_CHANNEL_MAP[0][1]=4;
 
-	ad_channel_map[1][0]=2;
-	ad_channel_map[1][1]=5;
+	AD_CHANNEL_MAP[1][0]=2;
+	AD_CHANNEL_MAP[1][1]=5;
 
-	ad_channel_map[2][0]=1;
-	ad_channel_map[2][1]=6;
+	AD_CHANNEL_MAP[2][0]=1;
+	AD_CHANNEL_MAP[2][1]=6;
 
-	ad_channel_map[3][0]=0;
-	ad_channel_map[3][1]=7;
+	AD_CHANNEL_MAP[3][0]=0;
+	AD_CHANNEL_MAP[3][1]=7;
 
 }
 /**
@@ -78,8 +77,13 @@ void controller_setSetpoint(int channel, int setp) {
  */
 void controller_task(int channel){
 
+	int32_t meas;
+	static int32_t meas_old[4]={0,0,0,0};
+	int32_t rdiff;
+	int32_t reg = 0;
+
 	// Get the sensor value.
-	meas = adc_getResult(ad_channel_map[channel][0]) - adc_getResult(ad_channel_map[channel][1]);
+	meas = adc_getResult(AD_CHANNEL_MAP[channel][0]) - adc_getResult(AD_CHANNEL_MAP[channel][1]);
 
 	// Calculate the difference between setpoint and sensor value
 	rdiff = setpoint[channel] - meas;

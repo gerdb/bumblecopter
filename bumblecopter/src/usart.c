@@ -21,15 +21,20 @@
  */
 #include "usart.h"
 
+// controller parameter
 extern int32_t KP;
-extern int32_t KI;
+//extern int32_t KI;
 extern int32_t KD;
 extern __IO int step;
 
+// Transmit buffer with read and write pointer
 uint8_t tx_buffer[1024];
 uint16_t wr_pointer = 0;
 uint16_t rd_pointer = 0;
 
+/**
+ * Initialize the USART
+ */
 void usart_init(void) {
     GPIO_InitTypeDef  GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
@@ -74,9 +79,13 @@ void usart_init(void) {
 
 }
 
+/**
+ * Handle the USART buffer
+ */
 void usart_buffertask(void) {
 char c;
 
+	// Send new bytes from the transmit buffer
 	if (wr_pointer != rd_pointer) {
 		rd_pointer++;
 		rd_pointer &= 0x03FF;
@@ -85,28 +94,28 @@ char c;
 
 	}
 
-	  if ((USART1->SR & USART_FLAG_RXNE))
-	  {
-	    c = USART1->DR & 0x00FF;
+	// Decode the received characters
+	// and use them to set the controller parameter
+	if ((USART1->SR & USART_FLAG_RXNE))
+	{
+		c = USART1->DR & 0x00FF;
 	    switch (c) {
 	    case 'q':
 	    	KP +=5;
 	    	break;
 	    case 'a':
-//	    	if (KP >= 5)
 	    		KP -=5;
 	    	break;
-	    case 'w':
-	    	KI +=5;
-	    	break;
-	    case 's':
-	    	if (KI >= 5) KI -=5;
-	    	break;
+//	    case 'w':
+//	    	KI +=5;
+//	    	break;
+//	    case 's':
+//	    	if (KI >= 5) KI -=5;
+//	    	break;
 	    case 'e':
 	    	KD +=5;
 	    	break;
 	    case 'd':
-//	    	if (KD >= 5)
 	    		KD -=5;
 	    	break;
 	    case 'r':
@@ -121,8 +130,16 @@ char c;
 
 }
 
+/**
+ * Write a new character into the transmit buffer
+ * This function is called by the printf function
+ *
+ * @param
+ * 		ch New character to send
+ */
 void usart_putchar(int ch) {
 
+	// Write the character into the buffer
 	wr_pointer++;
 	wr_pointer &= 0x03FF;
 	if (wr_pointer == rd_pointer) {

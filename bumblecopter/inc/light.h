@@ -25,13 +25,13 @@
 #include "stm32f4xx.h"
 #include "typedef.h"
 
+// Function Prototypes
 void light_init(void);
-void light_set_phase(int p_phase);
-void light_set_on(int p_on);
 void light_power_led(int p_on);
 void light_task(e_sysstate sysstate);
 void light_set_error(e_errstate e);
 
+// Constant values
 #define ON 1
 #define OFF 0
 

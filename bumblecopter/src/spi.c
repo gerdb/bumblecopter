@@ -22,18 +22,29 @@
 #include "spi.h"
 SPI_InitTypeDef  SPI_InitStructure;
 
+// SPI state
 int spi_tcnt = 0;
+// command
 int CmdStatus = 0x00;
+// Bytes to send
 uint8_t spi_txdata[2] = {0,0};
+// Result of the altimeter
 uint32_t d1_result = 0;
-__IO uint8_t spi_result = 0x00;
-__IO int spi_gyro = 0;
-__IO uint8_t spi_rxdata[4] = {0,0,0,0};
-__IO uint8_t spi_gyrodata[6] = {0,0,0,0,0,0};
+// SPI result
+uint8_t spi_result = 0x00;
+// The gyro signal
+int spi_gyro = 0;
+// The received SPI data
+uint8_t spi_rxdata[4] = {0,0,0,0};
+// The gyro data
+uint8_t spi_gyrodata[6] = {0,0,0,0,0,0};
+// Bytes to send and to receive
 int spi_tx_bytes = 0;
 int spi_rx_bytes = 0;
-
+// Counter to read out the gyro registers
 int gyro_i;
+
+// Configuration structure of the gyro module
 #define GYRO_CONFS 6
 uint8_t gyro_conf[GYRO_CONFS][2] = {
 	{LSM330DL_CTRL_REG1_G,0xFF}, // 800Hz/ 110Hz X,Y,Z enabled
@@ -45,18 +56,20 @@ uint8_t gyro_conf[GYRO_CONFS][2] = {
 	};//
 
 
+/**
+ * Initialize the SPI
+ */
 void spi_init(void) {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	// Peripheral Clock Enable -------------------------------------------------
 	// Enable the SPI clock
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 
 	// Enable GPIO clocks
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
-	// SPI GPIO Configuration --------------------------------------------------
+	// SPI GPIO Configuration
 	// Connect SPI pins to AF5
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, GPIO_AF_SPI2);
@@ -129,15 +142,24 @@ void spi_init(void) {
 
 }
 
+/**
+ * Interrupt callback function for the received bytes
+ */
 void spi_rx_irq(void) {
+
+	// Receive the byte and store it in a buffer
     if (spi_rx_bytes>0) {
         spi_rx_bytes--;
     	spi_rxdata[spi_tx_bytes] = SPI_I2S_ReceiveData(SPI2);
     }
 }
 
-
+/**
+ * Interrupt service function for the transmittion of a new byte
+ */
 void spi_tx_irq(void) {
+
+	// Was ist the first byte, the command ?
 	if (CmdStatus == 0)
     {
 	    // Send Transaction code
@@ -146,15 +168,18 @@ void spi_tx_irq(void) {
     }
     else
     {
+    	// Receive the bytes
         if (spi_rx_bytes>0) {
             spi_rx_bytes--;
         	spi_rxdata[spi_rx_bytes] = SPI_I2S_ReceiveData(SPI2);
         }
 
+        // Send the next byte ..
     	spi_tx_bytes--;
     	if (spi_tx_bytes >0) {
     		SPI_I2S_SendData(SPI2,spi_txdata[1]);
     	}
+    	//.. or stop transmitting new bytes
     	else {
             SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, DISABLE);
     	}
@@ -162,6 +187,15 @@ void spi_tx_irq(void) {
 
 }
 
+/**
+ * Send maximum 2 bytes and receive n bytes
+ *
+ * @param
+ * 			bytes Number of bytes to send and to receive
+ * 			txdata1 First byte to send
+ * 			txdata2 2nd byte to send
+ *
+ */
 void spi_send(int bytes, uint8_t txdata1,uint8_t txdata2 ) {
 	spi_tx_bytes = bytes;
 	spi_rx_bytes = bytes;
@@ -171,6 +205,9 @@ void spi_send(int bytes, uint8_t txdata1,uint8_t txdata2 ) {
 	SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, ENABLE);
 }
 
+/**
+ * The SPI state machine
+ */
 void spi_machine(void) {
 
     switch (spi_tcnt) {
@@ -204,6 +241,8 @@ void spi_machine(void) {
         break;
 */
 
+    // Initialize the gyro
+    // Read the REG1
     case 1:
     	SPI_CS_GYRO_ENABLE();
 	    spi_send(2,LSM330DL_CTRL_REG1_G | LSM330DL_READ,0);
@@ -215,6 +254,7 @@ void spi_machine(void) {
     	gyro_i = 0;
         break;
 
+    // Send the configuration structure to the gyro
     case 3:
     	if (gyro_i < GYRO_CONFS) {
         	SPI_CS_GYRO_ENABLE();
@@ -232,21 +272,28 @@ void spi_machine(void) {
 		spi_tcnt = 3-1;
         break;
 
+    // At case 100, the cyclic procedure starts
+
+    // Read the gyro status
     case 100:
     	SPI_CS_GYRO_ENABLE();
 	    spi_send(2,LSM330DL_STATUS_REG_G | LSM330DL_READ,0);
         break;
 
+    // Is there new Z-data available ?
     case 101:
     	SPI_CS_GYRO_DISABLE();
     	if (spi_rxdata[0] & 0x04) { // new Z-Data available ?;
+    		// Continue with case 102
     		spi_tcnt = 102-1;
     	}
     	else {
+    		// Go back to case 100
     		spi_tcnt = 100-1;
     	}
         break;
 
+    // Read out the X,Y and Z-Data
     case 102:
     	SPI_CS_GYRO_DISABLE();
     	if (gyro_i> 0) {
@@ -260,12 +307,14 @@ void spi_machine(void) {
     	}
     	else {
         	SPI_CS_GYRO_DISABLE();
+        	// Get the Z-Data
         	spi_gyro = (int)(int16_t)((uint16_t)spi_gyrodata[5] << 8 | spi_gyrodata[4]);
     		gyro_i = 0;
     		spi_tcnt = 100-1;
     	}
         break;
 
+    // Wait some cycles until there could be new data available
     case 108:
     	spi_tcnt = 100-1;
         break;
@@ -273,10 +322,22 @@ void spi_machine(void) {
     spi_tcnt++;
 }
 
+/**
+ * Getter for the gyro data
+ *
+ * @return
+ * 			The gyro rate
+ */
 int spi_getGyro(void) {
 	return spi_gyro;
 }
 
+/**
+ * Getter for the altimeter
+ *
+ * @return
+ * 		The air pressure
+ */
 uint32_t spi_get_d1(void) {
 	// 1000m = ca 100mbar
 	// 1m = 0.1mbar

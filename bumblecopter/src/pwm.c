@@ -21,13 +21,15 @@
  */
 #include "pwm.h"
 
-TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-TIM_OCInitTypeDef  TIM_OCInitStructure;
-
-uint16_t PrescalerValue = 0;
+/**
+ * Initialize the PWM module
+ */
 void pwm_init(void) {
 
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
+	uint16_t PrescalerValue = 0;
 
 	// TIM3&4 clock enable
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -128,6 +130,13 @@ void pwm_init(void) {
 	TIM_Cmd(TIM4, ENABLE);
 }
 
+/**
+ * Set the PWM value for a specified channel
+ *
+ * @param
+ * 			channel Channel 0..3
+ * 			value   Value of the PWM from 0..999
+ */
 void pwm_set(uint16_t channel, int16_t value) {
 	switch (channel) {
 	case 1:

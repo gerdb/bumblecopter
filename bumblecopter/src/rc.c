@@ -21,19 +21,21 @@
  */
 #include "rc.h"
 #include "misc.h"
-//#include "stm32f4_discovery.h"
 
-TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-TIM_OCInitTypeDef  TIM_OCInitStructure;
-TIM_ICInitTypeDef  TIM_ICInitStructure;
-GPIO_InitTypeDef GPIO_InitStructure;
-NVIC_InitTypeDef NVIC_InitStructure;
-
+// Result of the 6 RC channels
 uint16_t rc_in_sigs[6] = {300,300,300,300,300,300};
 uint16_t rc_in_ix=0;
 
-
+/**
+ * Initializer of the RC module
+ */
 void rc_init(void) {
+
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+	TIM_ICInitTypeDef  TIM_ICInitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
 
     // GPIOA clock enable
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -134,16 +136,29 @@ void rc_init(void) {
 
 }
 
-
-
+/**
+ * Set the output channel (to the motor controller)
+ * with a specified value
+ *
+ * @param
+ * 		value the new motor speed from -100 to +200
+ *
+ */
 void rc_set(int16_t value) {
 	TIM_SetCompare1(TIM10, 300+value);
 }
 
+/**
+ * IRQ callback function that decodes the duty and the
+ * periode and sort it into the channel number
+ */
 void rc_captured(uint16_t duty, uint16_t periode) {
+
+	// If the periode is >600 (3ms), it is a new sequence
 	if (periode > 600 ) {
 		rc_in_ix = 0;
 	}
+	// Put the value into the next field of the array
 	else if (rc_in_ix < 6) {
 		rc_in_sigs[rc_in_ix] = periode;
 		rc_in_ix++;
@@ -151,8 +166,14 @@ void rc_captured(uint16_t duty, uint16_t periode) {
 
 }
 
+/**
+ * Getter for the RC value
+ *
+ * @param
+ * 			channel selected channel
+ * @return
+ * 			Value of the RC channel. 1ms = 200, 2ms = 400
+ */
 int16_t rc_get_channel(int channel) {
 	return rc_in_sigs[channel]-300;
 }
-
-

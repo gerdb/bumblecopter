@@ -22,9 +22,12 @@
 #include "adc.h"
 #include "project.h"
 
-#define ADC1_DR_ADDRESS    ((uint32_t)0x4001204C)
+// The result of the analog to digital conversion
 __IO uint16_t ADCConvertedValue[11] = {0,0,0,0,0,0,0,0,0,0,0};
 
+/**
+ * Initializes the ADC
+ */
 void adc_init() {
 	  ADC_InitTypeDef       ADC_InitStructure;
 	  ADC_CommonInitTypeDef ADC_CommonInitStructure;
@@ -114,6 +117,9 @@ void adc_init() {
 	  ADC_Cmd(ADC1, ENABLE);
 }
 
+/**
+ * Start the Analog to digital conversion
+ */
 void adc_start_conv(void) {
 
 	// Start ADC1 Software Conversion
@@ -121,7 +127,15 @@ void adc_start_conv(void) {
 
 }
 
-
+/**
+ * Get the Result of the analog conversion
+ *
+ * @param
+ * 			chan ADC Channel
+ * @return
+ * 			ADC Result
+ *
+ */
 uint16_t adc_getResult(int chan) {
 	return ADCConvertedValue[chan];
 }

@@ -58,9 +58,7 @@ int main(void) {
 	// initialize all modules
 	light_init();
 	adc_init();
-#ifdef USE_DAC
 	dac_init();
-#endif
 	pwm_init();
 	rc_init();
 	spi_init();
@@ -68,6 +66,8 @@ int main(void) {
 	controller_init();
 	power_init();
 	rotation_init();
+
+	sysstate = GYRO;
 
 	// set sys tick to 100us
 	SysTick_Config(SystemCoreClock / 10000);
@@ -88,13 +88,12 @@ int main(void) {
 
 
 		if (time == 2000) {
-			//sysstate = GYRO;
+			sysstate = SUN;
 			//light_set_error(ACTOR);
 			time = 0;
 			//my_printf("%d,%d,%d,%d,%d,%d,%d\r\n",adc_getResult(3),adc_getResult(4),reg,KP,KI,KD,step);
 			//my_printf("%d\r\n",rotation_getAngle());
 			//my_printf("%d\r\n",power_getUbatFilt());
-			my_printf("%d\r\n",rotation_getPolFilt());
 			t2cnt ++;
 
 			if (t2cnt == 10) {

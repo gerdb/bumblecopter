@@ -22,9 +22,12 @@
 #ifndef ROTATION_H_
 #define ROTATION_H_
 
+#include "stm32f4xx.h"
+
+// Function Prototypes
 void rotation_init(void);
 void rotation_task(void);
 int rotation_getAngle(void);
-int rotation_getPolFilt(void);
+uint16_t rotation_getPhase(void);
 
 #endif /* ROTATION_H_ */

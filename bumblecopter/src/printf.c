@@ -34,7 +34,9 @@
 //#define putchar(c) USART2_putchar(c)
 #include "usart.h"
 
-
+/**
+ * The printchar function that uses the USART
+ */
 static void printchar(char **str, int c)
 {
 	extern int putchar(int c);

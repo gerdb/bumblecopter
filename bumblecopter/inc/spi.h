@@ -25,6 +25,7 @@
 #include "stm32f4xx_spi.h"
 #include "misc.h"
 
+// Function Prototypes
 void spi_init(void);
 void spi_tx_irq(void);
 void spi_rx_irq(void);
@@ -32,6 +33,7 @@ void spi_machine(void);
 void spi_send(int bytes,uint8_t txdata1,uint8_t txdata2 );
 int spi_getGyro(void);
 
+// Macros
 #define SPI_CS_ALT_DISABLE() GPIOE->BSRRL = GPIO_Pin_8;
 #define SPI_CS_ALT_ENABLE() GPIOE->BSRRH = GPIO_Pin_8;
 #define SPI_CS_GYRO_DISABLE() GPIOE->BSRRL = GPIO_Pin_5;
@@ -40,7 +42,7 @@ int spi_getGyro(void);
 #define SPI_CS_ACC_ENABLE() GPIOE->BSRRH = GPIO_Pin_6;
 
 
-
+// Constant values
 #define MS5611_CMD_ADC_READ 0x00
 #define MS5611_CMD_RESET 0x1E
 #define MS5611_CMD_CONV_D1_256 0x40

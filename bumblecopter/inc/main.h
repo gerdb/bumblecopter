@@ -24,8 +24,8 @@
 
 #include "stm32f4xx.h"
 #include "typedef.h"
+
+// Function Prototypes
 void setTick(void);
-
-
 
 #endif

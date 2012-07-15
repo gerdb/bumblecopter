@@ -26,6 +26,7 @@
 #include "stm32f4xx_usart.h"
 #include "stm32f4xx_gpio.h"
 
+// Function Prototypes
 void usart_init(void);
 void usart_putchar(int ch);
 void usart_buffertask(void);
